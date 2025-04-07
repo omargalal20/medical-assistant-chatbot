@@ -1,6 +1,6 @@
 # Medical Q&A Assistant Backend
 
-## Table of Contents
+# Table of Contents
 
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
