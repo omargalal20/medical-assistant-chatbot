@@ -15,6 +15,14 @@ class Settings(BaseSettings):
     APP_NAME: str
     APP_VERSION: str
 
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_REGION: str
+
+    MODEL_ID: str
+    MODEL_TEMPERATURE: float
+    MODEL_MAX_TOKENS: int
+
     class Config:
         env_file = get_env_filename()
         env_file_encoding = "utf-8"
