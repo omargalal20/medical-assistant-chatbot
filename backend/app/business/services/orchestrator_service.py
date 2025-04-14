@@ -21,7 +21,24 @@ class OrchestratorService:
         self.template = get_medical_qa_template("medical_qa")
 
     async def chat(self, doctor_query: str) -> LLMResponse:
-        """Generate the initial part of an interactive story."""
+        """
+        Generate a complete, evidence-based response for a medical query.
+
+        This function:
+        - Constructs a query-specific input template based on the doctor's question.
+        - Runs a pre-configured chain combining the template, LLM, and output parser.
+        - Returns the generated response as an `LLMResponse` object.
+
+        Parameters:
+        - doctor_query (str): The medical question or prompt provided by the doctor.
+
+        Returns:
+        - LLMResponse: Contains the generated response in structured format.
+
+        Raises:
+        - RuntimeError: If the chain fails to generate a response due to an exception.
+        """
+
         template = get_medical_qa_template("medical_qa")
 
         template_vars = {
@@ -46,7 +63,24 @@ class OrchestratorService:
             raise RuntimeError("LLM failed to generate response.") from e
 
     async def chat_stream(self, doctor_query: str) -> AsyncIterable[str]:
-        """Stream response for an interactive story."""
+        """
+        Stream a response for a medical query in real-time.
+
+        This function:
+        - Uses an async generator to provide incremental updates to the response.
+        - Constructs a query-specific input template based on the doctor's question.
+        - Streams responses from the LLM, yielding formatted data chunks as they are generated.
+
+        Parameters:
+        - doctor_query (str): The medical question or prompt provided by the doctor.
+
+        Yields:
+        - str: Formatted chunks of the response, each encapsulated as an event stream data message.
+
+        Raises:
+        - RuntimeError: If the chain fails to stream a response due to an exception.
+        """
+
         template = get_medical_qa_template("medical_qa")
 
         template_vars = {
