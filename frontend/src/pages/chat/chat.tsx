@@ -14,7 +14,6 @@ import {
 import { ChatContainer, ChatForm, ChatMessages } from "@/components/ui/chat"
 import { MessageInput } from "@/components/ui/message-input"
 import { MessageList } from "@/components/ui/message-list"
-import { Role } from "@/components/ui/chat-message"
 
 const MODELS = [
   { id: "us.anthropic.claude-3-7-sonnet-20250219-v1:0", name: "Claude 3.7 Sonnet" },
@@ -32,7 +31,7 @@ export function Chat() {
     isTyping,
     stop,
   } = useChat((import.meta.env.VITE_WS_URL as string))
-  
+
   const isEmpty = messages.length === 0
 
   console.log("Messages:", messages)
