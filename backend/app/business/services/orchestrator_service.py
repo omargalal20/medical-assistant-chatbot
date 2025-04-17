@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import AsyncIterable
 
 from langchain_core.exceptions import LangChainException
@@ -5,8 +6,10 @@ from langchain_core.output_parsers import StrOutputParser
 from loguru import logger
 
 from business.clients.llm_client import LLMClient
-from business.schemas.llm_response import LLMResponse
+from business.schemas.medical_qa_assistant import AssistantResponse
 from business.templates.v1.medical_qa_template import get_medical_qa_template
+from data.models.enums.role import Role
+from presentation.schemas.medical_qa_assistant import DoctorQuery
 
 
 class OrchestratorService:
@@ -20,7 +23,7 @@ class OrchestratorService:
         self.llm = llm_client.get_llm()
         self.template = get_medical_qa_template("medical_qa")
 
-    async def chat(self, doctor_query: str) -> LLMResponse:
+    async def chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
         """
         Generate a complete, evidence-based response for a medical query.
 
@@ -39,10 +42,12 @@ class OrchestratorService:
         - RuntimeError: If the chain fails to generate a response due to an exception.
         """
 
+        logger.info(f"OrchestratorService, chat, doctor_query: {doctor_query}")
+
         template = get_medical_qa_template("medical_qa")
 
         template_vars = {
-            "doctor_query": doctor_query
+            "doctor_query": doctor_query.content
         }
 
         logger.debug(f"Medical QA Template Variables: {template_vars}")
@@ -55,8 +60,13 @@ class OrchestratorService:
 
             logger.debug(f"Response: {response}")
 
-            return LLMResponse(
-                response=response
+            current_time = datetime.now()
+
+            return AssistantResponse(
+                id=current_time,
+                role=Role.ASSISTANT,
+                content=response,
+                created_at=current_time
             )
         except LangChainException as e:
             logger.error(f"LLM failed to generate response: {str(e)}")

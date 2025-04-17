@@ -1,17 +1,13 @@
-import './globals.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Chat from '@/pages/chat/chat'
-import Layout from '@/components/layout/layout'
+import { Chat } from '@/pages/chat/chat'
 
 function App() {
 
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Chat />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/" element={<Chat />} />
+      </Routes>
   </BrowserRouter>
   )
 }

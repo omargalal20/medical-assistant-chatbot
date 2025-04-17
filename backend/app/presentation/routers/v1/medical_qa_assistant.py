@@ -1,9 +1,10 @@
-from typing import AsyncIterable, Annotated
+from typing import AsyncIterable
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from loguru import logger
 
 from presentation.dependencies import OrchestratorServiceDependency
+from presentation.schemas.medical_qa_assistant import DoctorQuery, AssistantResponse
 
 router = APIRouter(prefix="/medical-qa-assistant")
 
@@ -14,8 +15,8 @@ class ConnectionManager:
         await websocket.accept()
 
     @staticmethod
-    async def send_message(message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_message(assistant_response: AssistantResponse, websocket: WebSocket):
+        await websocket.send_json(assistant_response.model_dump_json())
 
     @staticmethod
     async def send_stream(message_stream: AsyncIterable[str], websocket: WebSocket):
@@ -27,23 +28,30 @@ manager = ConnectionManager()
 
 
 @router.websocket("/ws")
-async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency,
-                               response_mode: Annotated[str, Query()]):
+async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
     """
     WebSocket endpoint for the medical qa assistant.
     """
+    # Parse query parameters manually from websocket
+    query_params = websocket.query_params
+    response_mode = query_params.get("response_mode", "NORMAL")  # Default to "NORMAL" if not provided
+    logger.info(f"Query params: {query_params}")
+
     await manager.connect(websocket)
     try:
         if response_mode == "STREAM":
             while True:
-                doctor_query = await websocket.receive_text()
+                doctor_query: DoctorQuery = await websocket.receive_json()
+                logger.info(f"doctor_query: {doctor_query}")
                 async for chunk in orchestrator.chat_stream(doctor_query):
                     await manager.send_message(chunk, websocket)
         elif response_mode == "NORMAL":
             while True:
-                doctor_query = await websocket.receive_text()
-                response = await orchestrator.chat(doctor_query)
-                await manager.send_message(response.model_dump_json(), websocket)
+                json_doctor_query = await websocket.receive_json()
+                doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
+                logger.info(f"doctor_query: {doctor_query}")
+                assistant_response: AssistantResponse = await orchestrator.chat(doctor_query)
+                await manager.send_message(assistant_response, websocket)
 
     except WebSocketDisconnect:
         logger.info("Client disconnected.")
