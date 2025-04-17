@@ -51,8 +51,25 @@ MEDICAL_QA_TEMPLATE = PromptTemplate(
     # Output Structure
 
     - Provide a clear, structured answer addressing the doctor's query directly, referencing evidence-based sources and including the latest treatments where relevant.
-    - Optionally, include 1-2 follow-up considerations or alternative insights.
-    - If applicable to the doctor's question, end with a confirmation: “Does this address your query, or would you like further elaboration?”
+    - Exclude using big titles
+    
+    - Key Considerations:
+      - Begin by outlining the critical differential diagnoses or factors relevant to the query. Use bullet points to clearly and succinctly list potential causes, conditions, or considerations.
+
+    - Evidence-Based Approach:
+      - Include recent guidelines, studies, or consensus recommendations. Reference trusted sources like PubMed or clinical guidelines where applicable.
+      - Provide practical steps for diagnostic workup, such as recommended tests, imaging studies, or evaluations.
+
+    - Current Management Recommendations:
+      - Detail specific treatment options, best practices, or emerging treatments relevant to the query.
+      - Include dosage or procedural notes only when clinically significant.
+
+    - Follow-up Considerations:
+      - Offer 1-2 additional questions or actions that the doctor may consider to refine their approach or explore further.
+      - Optionally, suggest next steps for monitoring or specialist consultations if applicable.
+
+    - Example Closing:
+      - If applicable to the doctor's question, conclude with: “Does this address your query, or would you like further elaboration?” to ensure the response is clear and actionable.
    """
 )
 
