@@ -16,7 +16,7 @@ class ConnectionManager:
 
     @staticmethod
     async def send_message(assistant_response: AssistantResponse, websocket: WebSocket):
-        await websocket.send_json(assistant_response.model_dump_json())
+        await websocket.send_text(assistant_response.model_dump_json())
 
     @staticmethod
     async def send_stream(message_stream: AsyncIterable[str], websocket: WebSocket):
@@ -41,10 +41,10 @@ async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorS
     try:
         if response_mode == "STREAM":
             while True:
-                doctor_query: DoctorQuery = await websocket.receive_json()
+                json_doctor_query = await websocket.receive_json()
+                doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
                 logger.info(f"doctor_query: {doctor_query}")
-                async for chunk in orchestrator.chat_stream(doctor_query):
-                    await manager.send_message(chunk, websocket)
+                await manager.send_stream(orchestrator.chat_stream(doctor_query), websocket)
         elif response_mode == "NORMAL":
             while True:
                 json_doctor_query = await websocket.receive_json()
