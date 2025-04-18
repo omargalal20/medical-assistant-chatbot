@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     MODEL_TEMPERATURE: float
     MODEL_MAX_TOKENS: int
 
+    RETRIEVER_API_KEY: str
+    RETRIEVER_TOP_K_RESULTS: int
+
     class Config:
         env_file = get_env_filename()
         env_file_encoding = "utf-8"

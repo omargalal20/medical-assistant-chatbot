@@ -6,9 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.115.12",
+    "langchain-community>=0.3.21",
     "langchain>=0.3.23",
     "langchain-aws>=0.2.19",
     "loguru>=0.7.3",
     "pydantic>=2.11.2",
     "pydantic-settings>=2.8.1",
+    "xmltodict>=0.14.2",
 ]
