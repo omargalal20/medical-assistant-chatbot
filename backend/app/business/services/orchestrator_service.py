@@ -64,7 +64,7 @@ class OrchestratorService:
             template_vars["context"] = "No relevant articles found."
         else:
             template_vars["context"] = "\n\n".join(
-                [f"Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}" for doc in
+                [f"PubMed ID: {doc.metadata.get('uid', 'Unknown')} | Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}" for doc in
                  relevant_articles]
             )
 

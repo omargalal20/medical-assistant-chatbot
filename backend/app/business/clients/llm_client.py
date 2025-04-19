@@ -1,4 +1,5 @@
 from langchain_aws import ChatBedrockConverse
+from langchain_community.tools import PubmedQueryRun
 from loguru import logger
 
 from config.settings import get_settings
@@ -20,6 +21,8 @@ class LLMClient:
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_REGION
             )
+
+            self.llm.bind_tools([PubmedQueryRun()])
         except Exception as e:
             logger.error(f"LLM failed to instantiate: {str(e)}")
             raise RuntimeError("LLM failed to instantiate.") from e
