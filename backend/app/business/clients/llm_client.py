@@ -1,4 +1,6 @@
 from langchain_aws import ChatBedrockConverse
+from langchain_community.tools import PubmedQueryRun
+from langchain_community.tools import BaseTool
 from loguru import logger
 
 from config.settings import get_settings
@@ -27,3 +29,6 @@ class LLMClient:
     def get_llm(self):
         """Return the configured LLM instance."""
         return self.llm
+
+    def bind_tools_to_llm(self, tools):
+        self.llm.bind_tools(tools)

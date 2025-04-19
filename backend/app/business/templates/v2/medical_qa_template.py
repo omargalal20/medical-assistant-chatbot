@@ -1,4 +1,8 @@
+from langchain.tools import PubmedQueryRun
 from langchain_core.prompts import PromptTemplate
+
+# Initialize PubMed tool
+tool = PubmedQueryRun()
 
 MEDICAL_QA_TEMPLATE = PromptTemplate(
     input_variables=["doctor_query", "context"],
@@ -27,7 +31,7 @@ MEDICAL_QA_TEMPLATE = PromptTemplate(
     The following are relevant articles retrieved from PubMed to support your response:
     {context}
 
-    Use this context as a knowledge base to enhance your response. Ensure you weave it into the answer, referencing relevant parts and citing the source (e.g., PMID, title, authors) where applicable.
+    Use this context as a knowledge base to enhance your response. Ensure you weave it into the answer, referencing relevant parts and citing the source (e.g., PMID, title, Published).
 
     # Goal
 
@@ -59,6 +63,12 @@ MEDICAL_QA_TEMPLATE = PromptTemplate(
     - Do not introduce irrelevant information or reference unauthorized sources.
     - Maintain professionalism and objectivity without emotional bias.
 
+    # Tools
+    - You have access to the following tools to assist users with medical queries:
+       `PubmedQueryRun`: Use this tool to query PubMed for accurate, evidence-based medical articles to inform your response. Always include citations where applicable to enhance credibility.
+
+    - Tool orchestration: First attempt to answer with PubMed references, then build a structured response integrating this evidence. Avoid introducing unsupported information.
+
     # Output Structure
 
     - Provide a clear, structured answer addressing the doctor's query directly, referencing evidence-based sources and including the latest treatments where relevant.
@@ -66,10 +76,17 @@ MEDICAL_QA_TEMPLATE = PromptTemplate(
 
     - Key Considerations:
       - Begin by outlining the critical differential diagnoses or factors relevant to the query. Use bullet points to clearly and succinctly list potential causes, conditions, or considerations.
-
+    
+    - Context Usage:
+      - When referencing the context data, Weave the output into the answer, referencing relevant parts and citing the source (e.g., PMID, title, Published) where applicable.
+    
+    - Tool Usage:
+      - When using the tool, do not present the usage of the tool. Weave the output into the answer, referencing relevant parts and citing the source (e.g., PMID, title, Published) where applicable.
+    
     - Evidence-Based Approach:
       - Include recent guidelines, studies, or consensus recommendations. Reference trusted sources like PubMed or clinical guidelines where applicable.
       - Provide practical steps for diagnostic workup, such as recommended tests, imaging studies, or evaluations.
+      - Ensure any data used from the relevant Pubmed Articles would be cited and referencing relevant parts and citing the source (e.g., PMID, title, Published).
 
     - Current Management Recommendations:
       - Detail specific treatment options, best practices, or emerging treatments relevant to the query.

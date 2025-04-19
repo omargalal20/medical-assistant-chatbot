@@ -13,4 +13,5 @@ dependencies = [
     "pydantic>=2.11.2",
     "pydantic-settings>=2.8.1",
     "xmltodict>=0.14.2",
+    "boto3>=1.37.33",
 ]

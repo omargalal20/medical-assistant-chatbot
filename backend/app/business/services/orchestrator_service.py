@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import AsyncIterable
 
+from langchain_community.tools import PubmedQueryRun
 from langchain_core.documents import Document
 from langchain_core.exceptions import LangChainException
 from langchain_core.output_parsers import StrOutputParser
@@ -22,6 +23,7 @@ class OrchestratorService:
     def __init__(self, llm_client: LLMClient, retriever_client: RetrieverClient):
         """Initialize with injected service dependencies."""
         self.llm_client = llm_client
+        llm_client.bind_tools_to_llm([PubmedQueryRun()])
         self.llm = llm_client.get_llm()
         self.template = get_medical_qa_template("medical_qa")
         self.retriever = retriever_client
@@ -64,8 +66,10 @@ class OrchestratorService:
             template_vars["context"] = "No relevant articles found."
         else:
             template_vars["context"] = "\n\n".join(
-                [f"Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}" for doc in
-                 relevant_articles]
+                [
+                    f"PubMed ID: {doc.metadata.get('uid', 'Unknown')} | Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}"
+                    for doc in
+                    relevant_articles]
             )
 
         logger.debug(f"Medical QA Template Variables: {template_vars}")
@@ -122,7 +126,6 @@ class OrchestratorService:
         }
 
         logger.debug(f"Medical QA Template Variables: {template_vars}")
-
 
         # Assuming `self.llm` supports streaming via an async generator
         chain = template | self.llm | StrOutputParser()
