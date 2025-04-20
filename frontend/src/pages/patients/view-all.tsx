@@ -12,11 +12,32 @@ function PatientList() {
   ];
 
   return (
-    <div className={cn('flex', 'flex-col', 'items-center', 'justify-center', 'h-screen', 'w-full', 'p-4')}>
-      <h1 className="text-2xl font-semibold mb-4">Patients</h1>
-      <ul className="w-full max-w-lg space-y-4">
-        {patients.map(patient => (
-          <li key={patient.id} className={cn('flex', 'justify-between', 'items-center', 'p-4', 'border', 'border-gray-300', 'rounded-lg')}>
+    <div
+      className={cn(
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center',
+        'h-screen',
+        'w-full',
+        'p-4',
+      )}
+    >
+      <h1 className='text-2xl font-semibold mb-4'>Patients</h1>
+      <ul className='w-full max-w-lg space-y-4'>
+        {patients.map((patient) => (
+          <li
+            key={patient.id}
+            className={cn(
+              'flex',
+              'justify-between',
+              'items-center',
+              'p-4',
+              'border',
+              'border-gray-300',
+              'rounded-lg',
+            )}
+          >
             <span>
               {patient.name} (Age: {patient.age})
             </span>
@@ -28,7 +49,7 @@ function PatientList() {
                 'px-4',
                 'py-2',
                 'rounded-lg',
-                'hover:bg-green-600'
+                'hover:bg-green-600',
               )}
             >
               View

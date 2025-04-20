@@ -10,9 +10,19 @@ function PatientDetails() {
   const patient = { id: Number(patientId), name: 'John Doe', age: 45, condition: 'Hypertension' }; // Mock data
 
   return (
-    <div className={cn('flex', 'flex-col', 'items-center', 'justify-center', 'h-screen', 'w-full', 'p-4')}>
-      <h1 className="text-2xl font-semibold mb-4">Patient Details</h1>
-      <div className="w-full max-w-lg space-y-4">
+    <div
+      className={cn(
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center',
+        'h-screen',
+        'w-full',
+        'p-4',
+      )}
+    >
+      <h1 className='text-2xl font-semibold mb-4'>Patient Details</h1>
+      <div className='w-full max-w-lg space-y-4'>
         <p>
           <strong>Name:</strong> {patient.name}
         </p>
@@ -30,7 +40,7 @@ function PatientDetails() {
             'px-4',
             'py-2',
             'rounded-lg',
-            'hover:bg-green-600'
+            'hover:bg-green-600',
           )}
         >
           Chat About Patient

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Message, Role } from "@/components/ui/chat-message";
+import { useState, useRef, useEffect } from 'react';
+import { Message, Role } from '@/components/ui/chat-message';
 
 interface UseChatHook {
   messages: Message[];
@@ -8,7 +8,7 @@ interface UseChatHook {
   handleInputChange: (value: string) => void;
   handleSubmit: (
     event?: { preventDefault?: () => void },
-    options?: { experimental_attachments?: FileList }
+    options?: { experimental_attachments?: FileList },
   ) => void;
   isLoading: boolean;
   isTyping: boolean;
@@ -28,10 +28,9 @@ interface MessagePayload {
   }[];
 }
 
-
 const useChat = (url: string): UseChatHook => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,22 +41,22 @@ const useChat = (url: string): UseChatHook => {
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log("Connected to WebSocket:", url);
+      console.log('Connected to WebSocket:', url);
       setError(null); // Clear any previous errors on successful connection
     };
 
     socket.onclose = () => {
-      console.log("Disconnected from WebSocket");
+      console.log('Disconnected from WebSocket');
     };
 
     socket.onmessage = (event) => {
       try {
         const rawData = JSON.parse(event.data);
-        console.log("Raw message received:", rawData);
+        console.log('Raw message received:', rawData);
 
-        if (typeof rawData === "string") {
+        if (typeof rawData === 'string') {
           const nestedData = JSON.parse(rawData);
-          console.log("Nested message decoded:", nestedData);
+          console.log('Nested message decoded:', nestedData);
 
           const normalizedMessage: Message = {
             id: nestedData.id,
@@ -81,14 +80,14 @@ const useChat = (url: string): UseChatHook => {
         setIsLoading(false);
         setIsTyping(false);
       } catch (error) {
-        console.error("Error processing message:", error);
-        setError("Failed to process incoming message.");
+        console.error('Error processing message:', error);
+        setError('Failed to process incoming message.');
       }
     };
 
     socket.onerror = (event) => {
-      console.error("WebSocket encountered an error:", event);
-      setError("A connection error occurred. Please try again.");
+      console.error('WebSocket encountered an error:', event);
+      setError('A connection error occurred. Please try again.');
     };
 
     return () => {
@@ -102,18 +101,18 @@ const useChat = (url: string): UseChatHook => {
 
   const handleSubmit = (
     event?: { preventDefault?: () => void },
-    options?: { experimental_attachments?: FileList }
+    options?: { experimental_attachments?: FileList },
   ) => {
     event?.preventDefault?.();
     if (!socketRef.current || !input.trim()) return;
-  
-    const userMessage: Omit<MessagePayload, "attachments"> = {
+
+    const userMessage: Omit<MessagePayload, 'attachments'> = {
       id: `${Date.now()}`,
       role: Role.USER,
       content: input,
       created_at: new Date(),
     };
-  
+
     const payload: MessagePayload = {
       ...userMessage,
       attachments: options?.experimental_attachments
@@ -124,22 +123,31 @@ const useChat = (url: string): UseChatHook => {
           }))
         : undefined,
     };
-  
+
     try {
       setMessages((prevMessages) => [...prevMessages, payload]);
       socketRef.current.send(JSON.stringify(payload));
       setIsLoading(true);
       setIsTyping(true);
       setError(null);
-      setInput("");
+      setInput('');
     } catch (error) {
-      console.error("Failed to send message:", error);
-      setError("Failed to send the message. Please try again.");
+      console.error('Failed to send message:', error);
+      setError('Failed to send the message. Please try again.');
     }
   };
-  
 
-  return { messages, input, setInput, handleInputChange, handleSubmit, isLoading, isTyping, stop, error };
+  return {
+    messages,
+    input,
+    setInput,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    isTyping,
+    stop,
+    error,
+  };
 };
 
 export default useChat;

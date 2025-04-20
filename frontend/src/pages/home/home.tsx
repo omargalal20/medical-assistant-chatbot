@@ -8,8 +8,8 @@ function Home() {
   const navigate = useNavigate();
   return (
     <div className={cn('flex', 'flex-col', 'items-center', 'justify-center', 'h-screen', 'w-full')}>
-      <h1 className="text-2xl font-semibold mb-4">Welcome to Medical Q&A Assistant</h1>
-      <div className="space-y-4">
+      <h1 className='text-2xl font-semibold mb-4'>Welcome to Medical Q&A Assistant</h1>
+      <div className='space-y-4'>
         <button
           onClick={() => navigate(MEDICAL_QA_NAVIGATE_ROUTES.GENERAL_CHAT)}
           className={cn(
@@ -20,7 +20,7 @@ function Home() {
             'py-2',
             'rounded-lg',
             'hover:bg-blue-600',
-            'm-2'
+            'm-2',
           )}
         >
           Ask General Questions
@@ -35,7 +35,7 @@ function Home() {
             'py-2',
             'rounded-lg',
             'hover:bg-green-600',
-            'm-2'
+            'm-2',
           )}
         >
           View Patients
