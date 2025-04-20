@@ -1,0 +1,20 @@
+name: hapi-fhir-server
+
+services:
+  fhir:
+    container_name: fhir
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${POSTGRES_URL}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    configs:
+      - source: hapi
+        target: /app/config/application.yaml
+    depends_on: []
+
+configs:
+  hapi:
+    file: ./hapi.application.yaml
