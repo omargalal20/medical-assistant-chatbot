@@ -115,6 +115,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "fhirclient" },
     { name = "langchain" },
     { name = "langchain-aws" },
     { name = "langchain-community" },
@@ -128,6 +129,7 @@ dependencies = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.37.33" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
+    { name = "fhirclient", specifier = ">=4.3.1" },
     { name = "langchain", specifier = ">=0.3.23" },
     { name = "langchain-aws", specifier = ">=0.2.19" },
     { name = "langchain-community", specifier = ">=0.3.21" },
@@ -339,6 +341,18 @@ wheels = [
 [package.optional-dependencies]
 standard = [
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[[package]]
+name = "fhirclient"
+version = "4.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2c/5e/dbec161d4fdfa0fc9c5fa5227af5cc5abd3b40b8849a1e38b9028a268b1c/fhirclient-4.3.1.tar.gz", hash = "sha256:f7564cae857614b2cfec8d88266f45ff3c6d08139433554384ad7c598493d0e0", size = 264103 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/7f/3654ce303c48718531c00363c925ed5cc013a3011997b84d506a7bf2e888/fhirclient-4.3.1-py3-none-any.whl", hash = "sha256:ebf9f6b0a2e2e6de640d3cc4d9245309f4afc65d5ac0b107eaec7e4933ae775f", size = 425484 },
 ]
 
 [[package]]

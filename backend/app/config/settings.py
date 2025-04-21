@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     RETRIEVER_API_KEY: str
     RETRIEVER_TOP_K_RESULTS: int
 
+    FHIR_CLIENT_APP_ID: str
+    FHIR_CLIENT_API_BASE: str
+
     class Config:
         env_file = get_env_filename()
         env_file_encoding = "utf-8"
