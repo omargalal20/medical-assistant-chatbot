@@ -14,6 +14,6 @@ export const MEDICAL_QA_NAVIGATE_ROUTES = {
   HOME: '/',
   GENERAL_CHAT: '/chat/general',
   PATIENTS: '/patients',
-  PATIENT_DETAILS: (id: number) => `/patients/${id}`,
-  PATIENT_SPECIFIC_CHAT: (id: number) => `/chat/patient/${id}`,
+  PATIENT_DETAILS: (id: string) => `/patients/${id}`,
+  PATIENT_SPECIFIC_CHAT: (id: string) => `/chat/patient/${id}`,
 };
