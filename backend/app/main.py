@@ -8,7 +8,7 @@ from business.clients.fhir_client import fhir_client_interface
 from config.logger import setup_logging
 from config.settings import get_settings
 from presentation.routers import health
-from presentation.routers.v1 import medical_qa_assistant, patients
+from presentation.routers.v1 import medical_qa_assistant, patients, conditions, encounters
 
 settings = get_settings()
 
@@ -37,6 +37,8 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(medical_qa_assistant.router, prefix="/api/v1", tags=["Medical QA Assistant"])
 app.include_router(patients.router, prefix="/api/v1", tags=["Patients"])
+app.include_router(encounters.router, prefix="/api/v1", tags=["Encounters"])
+app.include_router(conditions.router, prefix="/api/v1", tags=["Conditions"])
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

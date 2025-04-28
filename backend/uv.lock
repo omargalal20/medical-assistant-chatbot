@@ -115,7 +115,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "fastapi", extra = ["standard"] },
-    { name = "fhirclient" },
+    { name = "fhirpy" },
     { name = "langchain" },
     { name = "langchain-aws" },
     { name = "langchain-community" },
@@ -129,7 +129,7 @@ dependencies = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.37.33" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
-    { name = "fhirclient", specifier = ">=4.3.1" },
+    { name = "fhirpy", specifier = ">=2.0.15" },
     { name = "langchain", specifier = ">=0.3.23" },
     { name = "langchain-aws", specifier = ">=0.2.19" },
     { name = "langchain-community", specifier = ">=0.3.21" },
@@ -344,15 +344,18 @@ standard = [
 ]
 
 [[package]]
-name = "fhirclient"
-version = "4.3.1"
+name = "fhirpy"
+version = "2.0.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "aiohttp" },
+    { name = "pytz" },
     { name = "requests" },
+    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/5e/dbec161d4fdfa0fc9c5fa5227af5cc5abd3b40b8849a1e38b9028a268b1c/fhirclient-4.3.1.tar.gz", hash = "sha256:f7564cae857614b2cfec8d88266f45ff3c6d08139433554384ad7c598493d0e0", size = 264103 }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/3e/e619d423077276f292a2c49e82022886b8c47d709a12df837bc7c5624053/fhirpy-2.0.15.tar.gz", hash = "sha256:8718574b15735b21e2b04e36b2d87318875e5c41f17e6bada75a59ae446dc8eb", size = 29583 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5c/7f/3654ce303c48718531c00363c925ed5cc013a3011997b84d506a7bf2e888/fhirclient-4.3.1-py3-none-any.whl", hash = "sha256:ebf9f6b0a2e2e6de640d3cc4d9245309f4afc65d5ac0b107eaec7e4933ae775f", size = 425484 },
+    { url = "https://files.pythonhosted.org/packages/95/46/7351dc9eb079be11cd160fc5d48752074988b42b2823592cf4f464b86f6c/fhirpy-2.0.15-py3-none-any.whl", hash = "sha256:0de65918546c41114f132baba106babb36f5ca6e1c282bb88ea4db513a18dfa7", size = 28833 },
 ]
 
 [[package]]
@@ -1082,6 +1085,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f3/87/f44d7c9f274c7ee665a29b885ec97089ec5dc034c7f3fafa03da9e39a09e/python_multipart-0.0.20.tar.gz", hash = "sha256:8dd0cab45b8e23064ae09147625994d090fa46f5b0d1e13af944c331a7fa9d13", size = 37158 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/45/58/38b5afbc1a800eeea951b9285d3912613f2603bdf897a4ab0f4bd7f405fc/python_multipart-0.0.20-py3-none-any.whl", hash = "sha256:8a62d3a8335e06589fe01f2a3e178cdcc632f3fbe0d492ad9ee0ec35aab1f104", size = 24546 },
+]
+
+[[package]]
+name = "pytz"
+version = "2025.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/bf/abbd3cdfb8fbc7fb3d4d38d320f2441b1e7cbe29be4f23797b4a2b5d8aac/pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3", size = 320884 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/81/c4/34e93fe5f5429d7570ec1fa436f1986fb1f00c3e0f43a589fe2bbcd22c3f/pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00", size = 509225 },
 ]
 
 [[package]]
