@@ -1,6 +1,5 @@
-from fhirclient import client
-from fhirclient.server import FHIRUnauthorizedException, FHIRNotFoundException, FHIRPermissionDeniedException, \
-    FHIRServer
+from fhirpy import AsyncFHIRClient
+from fhirpy.base.exceptions import AuthorizationError, BaseFHIRError
 from loguru import logger
 
 from config.settings import get_settings
@@ -14,35 +13,26 @@ class FHIRClient:
     def __init__(self):
         """Initialize FHIR Client configuration."""
         self.fhir_client = None
-        self.fhir_client_settings = {
-            'app_id': settings.FHIR_CLIENT_APP_ID,
-            'api_base': settings.FHIR_CLIENT_API_BASE
-        }
 
     def initialize(self):
         """Return the configured FHIR server instance."""
         try:
-            self.fhir_client = client.FHIRClient(settings=self.fhir_client_settings)
+            self.fhir_client: AsyncFHIRClient = AsyncFHIRClient(
+                settings.FHIR_CLIENT_API_BASE,
+            )
 
-            logger.info(f"Is FHIR Server Prepared: {self.fhir_client.prepare()}")
-            logger.info(f"Is FHIR Server Ready: {self.fhir_client.ready}")
+            logger.info("FHIR Client Initialized")
 
-        except FHIRNotFoundException as e:
-            logger.error(f"FHIRNotFoundException: {str(e)}")
-            raise RuntimeError(f"FHIRNotFoundException: {str(e)}")
-        except FHIRUnauthorizedException as e:
+        except AuthorizationError as e:
             logger.error(f"FHIRUnauthorizedException: {str(e)}")
             raise RuntimeError(f"FHIRUnauthorizedException: {str(e)}")
-        except FHIRPermissionDeniedException as e:
-            logger.error(f"FHIRPermissionDeniedException: {str(e)}")
-            raise RuntimeError(f"FHIRPermissionDeniedException: {str(e)}")
-        except Exception as e:
+        except BaseFHIRError as e:
             logger.error(f"FHIR Client failed to instantiate: {str(e)}")
             raise RuntimeError("FHIR Client failed to instantiate.") from e
 
-    def get_fhir_server(self) -> FHIRServer:
+    def get_fhir_server(self) -> AsyncFHIRClient:
         """Return the configured FHIR server instance."""
-        return self.fhir_client.server
+        return self.fhir_client
 
 
 fhir_client_interface = FHIRClient()

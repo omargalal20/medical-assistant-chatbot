@@ -1,8 +1,7 @@
-from typing import List
-
 from fastapi import HTTPException, status
-from fhirclient.models.encounter import Encounter
-from fhirclient.models.fhirabstractbase import FHIRValidationError
+from fhirpy import AsyncFHIRClient
+from fhirpy.base.exceptions import BaseFHIRError, MultipleResourcesFound
+from fhirpy.lib import AsyncFHIRSearchSet
 from loguru import logger
 
 from business.dependencies import FHIRServerDependency
@@ -15,26 +14,23 @@ class EncountersService:
         """
         Initialize EncountersService with a FHIR client.
         """
-        self.fhir_server = fhir_server
+        self.fhir_server: AsyncFHIRClient = fhir_server
+        self.encounters: AsyncFHIRSearchSet = self.fhir_server.resources('Encounter')
 
-    def get_recent_encounters(self, patient_id: str, count: int = 3) -> List[Encounter]:
+    async def get_recent_encounters(self, patient_id: str, count: int = 3):
         """
         Retrieve recent encounters for a patient.
         """
         try:
-            search = Encounter.where(struct={
-                "patient": patient_id,
-                "_sort": "-_lastUpdated",
-                "_count": str(count)
-            })
-            encounters = search.perform_resources(self.fhir_server)
-            # There is an issue with the count
-            logger.debug(f"Number of encounters: {len(encounters)}")
-            return encounters
-        except FHIRValidationError as e:
-            logger.error(f"FHIRValidationError: {str(e)}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"FHIRValidationError: {str(e)}")
-        except Exception as e:
-            logger.error(f"Error fetching encounters for patient {patient_id}: {str(e)}")
+            recent_encounters = await self.encounters.search(patient=patient_id).limit(count).sort(
+                "-_lastUpdated").fetch()
+            logger.debug(f"Number of encounters: {len(recent_encounters)}")
+            return recent_encounters
+        except MultipleResourcesFound as e:
+            logger.error(f"MultipleResourcesFound: {str(e)}")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail=f"Error fetching encounters for patient {patient_id}: {str(e)}")
+                                detail=f"MultipleResourcesFound: {str(e)}")
+        except BaseFHIRError as e:
+            logger.error(f"BaseFHIRError:{str(e)}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                detail=f"Error retrieving patients: {str(e)}")

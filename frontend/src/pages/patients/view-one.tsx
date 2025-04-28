@@ -26,22 +26,16 @@ function ViewOne() {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const RECENT_ENCOUNTER_COUNT = 3; // Number of recent encounters to fetch
-        // Fetch data concurrently
+        const RECENT_ENCOUNTER_COUNT = 3;
         const [patientData, encountersData, conditionData] = await Promise.all([
           getOne(patientId),
           getRecentEncounters(patientId, RECENT_ENCOUNTER_COUNT),
           getLatestCondition(patientId),
         ]);
 
-        console.log('Patient Data:', patientData);
-        console.log('Encounters Data:', encountersData);
-        console.log('Latest Condition Data:', conditionData);
-
-        // Update state with the fetched data
         setPatient(patientData);
         setEncounters(encountersData);
-        setLatestCondition(conditionData);
+        setLatestCondition(conditionData[0]);
       } catch (error) {
         console.error('Failed to fetch patient details or related data:', error);
       } finally {
@@ -81,7 +75,7 @@ function ViewOne() {
       )}
     >
       <h1 className="text-2xl font-semibold mb-4">Patient Details</h1>
-      <div className="w-full max-w-lg space-y-4">
+      <div className="w-full space-y-4">
         <p>
           <strong>Name:</strong> {getFullName(patient)}
         </p>
@@ -93,20 +87,38 @@ function ViewOne() {
         </p>
         <h2 className="text-xl font-semibold mt-6">Recent Encounters</h2>
         {encounters.length > 0 ? (
-          <ul>
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-4">
             {encounters.map((encounter) => (
-              <li key={encounter.id}>
+              <div
+                key={encounter.id}
+                className={cn(
+                  'p-4',
+                  'rounded-lg',
+                  'shadow-md',
+                  'space-y-2',
+                  'border',
+                  'border-gray-200'
+                )}
+              >
+                <p><strong>Encounter ID:</strong> {encounter.id}</p>
                 <p><strong>Start Date:</strong> {encounter.period.start}</p>
                 <p><strong>End Date:</strong> {encounter.period.end}</p>
-              </li>
+                <p><strong>Status:</strong> {encounter.status}</p>
+                <p><strong>Type:</strong> {encounter.type.map(type => type.text).join(', ')}</p>
+                <p><strong>Class:</strong> {encounter.class.code}</p>
+                <p><strong>Service Provider:</strong> {encounter.serviceProvider.display}</p>
+                <p><strong>Reason Code:</strong> {encounter.reasonCode?.map(code => code.coding[0].display).join(', ')}</p>
+                <p><strong>Participant:</strong> {encounter.participant.map(participant => participant.individual.display).join(', ')}</p>
+                <p><strong>Recorded Date:</strong> {encounter.meta.lastUpdated}</p>
+              </div>
             ))}
-          </ul>
+          </div>
         ) : (
           <p>No recent encounters found.</p>
         )}
         <h2 className="text-xl font-semibold mt-6">Latest Condition</h2>
         {latestCondition ? (
-          <div>
+          <div className="p-4 rounded-lg shadow-md border border-gray-200">
             <p><strong>Condition:</strong> {latestCondition.code.text || 'No display available'}</p>
           </div>
         ) : (
