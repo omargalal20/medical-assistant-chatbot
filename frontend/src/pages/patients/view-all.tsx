@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table';
 
 import { getMany } from '@/services/v1/patients/routes';
 import { PatientResource } from '@/services/v1/patients/types';
@@ -39,31 +39,25 @@ function ViewAll() {
 
   return (
     <>
-      <div
-        className={cn(
-          'flex',
-          'flex-col',
-          'items-center',
-        )}
-      >
+      <div className={cn('flex', 'flex-col', 'items-center')}>
         <h1 className='text-2xl font-semibold mb-4'>Patients</h1>
       </div>
-      <Table className="w-[75%] mx-auto">
+      <Table className='w-[75%] mx-auto'>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead className='w-[100px]'>ID</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Date Of Birth</TableHead>
-            <TableHead className="text-right">View Patient</TableHead>
+            <TableHead className='text-right'>View Patient</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {patients.map((patient) => (
             <TableRow key={patient.id}>
-              <TableCell className="font-medium">{patient.id}</TableCell>
+              <TableCell className='font-medium'>{patient.id}</TableCell>
               <TableCell>{getFullName(patient)}</TableCell>
               <TableCell>{patient.birthDate}</TableCell>
-              <TableCell className="text-right">
+              <TableCell className='text-right'>
                 <button
                   onClick={() => navigate(MEDICAL_QA_NAVIGATE_ROUTES.PATIENT_DETAILS(patient.id))}
                   className={cn(
@@ -83,7 +77,6 @@ function ViewAll() {
         </TableBody>
       </Table>
     </>
-
   );
 }
 

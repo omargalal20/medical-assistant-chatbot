@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fhirpy.base.resource_protocol import TResource
 
 from presentation.dependencies import EncountersServiceDependency
 

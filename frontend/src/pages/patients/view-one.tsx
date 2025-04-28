@@ -48,7 +48,7 @@ function ViewOne() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen w-full">
+      <div className='flex items-center justify-center h-screen w-full'>
         <p>Loading...</p>
       </div>
     );
@@ -56,7 +56,7 @@ function ViewOne() {
 
   if (!patient) {
     return (
-      <div className="flex items-center justify-center h-screen w-full">
+      <div className='flex items-center justify-center h-screen w-full'>
         <p>Patient not found</p>
       </div>
     );
@@ -74,8 +74,8 @@ function ViewOne() {
         'p-4',
       )}
     >
-      <h1 className="text-2xl font-semibold mb-4">Patient Details</h1>
-      <div className="w-full space-y-4">
+      <h1 className='text-2xl font-semibold mb-4'>Patient Details</h1>
+      <div className='w-full space-y-4'>
         <p>
           <strong>Name:</strong> {getFullName(patient)}
         </p>
@@ -85,9 +85,9 @@ function ViewOne() {
         <p>
           <strong>Gender:</strong> {patient.gender}
         </p>
-        <h2 className="text-xl font-semibold mt-6">Recent Encounters</h2>
+        <h2 className='text-xl font-semibold mt-6'>Recent Encounters</h2>
         {encounters.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className='grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-4'>
             {encounters.map((encounter) => (
               <div
                 key={encounter.id}
@@ -97,29 +97,55 @@ function ViewOne() {
                   'shadow-md',
                   'space-y-2',
                   'border',
-                  'border-gray-200'
+                  'border-gray-200',
                 )}
               >
-                <p><strong>Encounter ID:</strong> {encounter.id}</p>
-                <p><strong>Start Date:</strong> {encounter.period.start}</p>
-                <p><strong>End Date:</strong> {encounter.period.end}</p>
-                <p><strong>Status:</strong> {encounter.status}</p>
-                <p><strong>Type:</strong> {encounter.type.map(type => type.text).join(', ')}</p>
-                <p><strong>Class:</strong> {encounter.class.code}</p>
-                <p><strong>Service Provider:</strong> {encounter.serviceProvider.display}</p>
-                <p><strong>Reason Code:</strong> {encounter.reasonCode?.map(code => code.coding[0].display).join(', ')}</p>
-                <p><strong>Participant:</strong> {encounter.participant.map(participant => participant.individual.display).join(', ')}</p>
-                <p><strong>Recorded Date:</strong> {encounter.meta.lastUpdated}</p>
+                <p>
+                  <strong>Encounter ID:</strong> {encounter.id}
+                </p>
+                <p>
+                  <strong>Start Date:</strong> {encounter.period.start}
+                </p>
+                <p>
+                  <strong>End Date:</strong> {encounter.period.end}
+                </p>
+                <p>
+                  <strong>Status:</strong> {encounter.status}
+                </p>
+                <p>
+                  <strong>Type:</strong> {encounter.type.map((type) => type.text).join(', ')}
+                </p>
+                <p>
+                  <strong>Class:</strong> {encounter.class.code}
+                </p>
+                <p>
+                  <strong>Service Provider:</strong> {encounter.serviceProvider.display}
+                </p>
+                <p>
+                  <strong>Reason Code:</strong>{' '}
+                  {encounter.reasonCode?.map((code) => code.coding[0].display).join(', ')}
+                </p>
+                <p>
+                  <strong>Participant:</strong>{' '}
+                  {encounter.participant
+                    .map((participant) => participant.individual.display)
+                    .join(', ')}
+                </p>
+                <p>
+                  <strong>Recorded Date:</strong> {encounter.meta.lastUpdated}
+                </p>
               </div>
             ))}
           </div>
         ) : (
           <p>No recent encounters found.</p>
         )}
-        <h2 className="text-xl font-semibold mt-6">Latest Condition</h2>
+        <h2 className='text-xl font-semibold mt-6'>Latest Condition</h2>
         {latestCondition ? (
-          <div className="p-4 rounded-lg shadow-md border border-gray-200">
-            <p><strong>Condition:</strong> {latestCondition.code.text || 'No display available'}</p>
+          <div className='p-4 rounded-lg shadow-md border border-gray-200'>
+            <p>
+              <strong>Condition:</strong> {latestCondition.code.text || 'No display available'}
+            </p>
           </div>
         ) : (
           <p>No condition found.</p>
