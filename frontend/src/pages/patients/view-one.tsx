@@ -5,31 +5,51 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MEDICAL_QA_NAVIGATE_ROUTES } from '@/routes/paths/medical-qa';
 import { getOne } from '@/services/v1/patients/routes';
+import { getRecentEncounters } from '@/services/v1/encounters/routes';
+import { getLatestCondition } from '@/services/v1/conditions/routes';
 import { PatientResource } from '@/services/v1/patients/types';
+import { EncounterResource } from '@/services/v1/encounters/types';
+import { ConditionResource } from '@/services/v1/conditions/types';
 import { getFullName } from './utils';
 
 function ViewOne() {
   const navigate = useNavigate();
   const { patientId } = useParams();
   const [patient, setPatient] = useState<PatientResource | null>(null);
+  const [encounters, setEncounters] = useState<EncounterResource[]>([]);
+  const [latestCondition, setLatestCondition] = useState<ConditionResource | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!patientId) return;
 
-    const fetchPatientDetails = async () => {
+    const fetchAllData = async () => {
       setLoading(true);
       try {
-        const data = await getOne(patientId);
-        setPatient(data);
+        const RECENT_ENCOUNTER_COUNT = 3; // Number of recent encounters to fetch
+        // Fetch data concurrently
+        const [patientData, encountersData, conditionData] = await Promise.all([
+          getOne(patientId),
+          getRecentEncounters(patientId, RECENT_ENCOUNTER_COUNT),
+          getLatestCondition(patientId),
+        ]);
+
+        console.log('Patient Data:', patientData);
+        console.log('Encounters Data:', encountersData);
+        console.log('Latest Condition Data:', conditionData);
+
+        // Update state with the fetched data
+        setPatient(patientData);
+        setEncounters(encountersData);
+        setLatestCondition(conditionData);
       } catch (error) {
-        console.error('Failed to fetch patient details:', error);
+        console.error('Failed to fetch patient details or related data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPatientDetails();
+    fetchAllData();
   }, [patientId]);
 
   if (loading) {
@@ -71,6 +91,27 @@ function ViewOne() {
         <p>
           <strong>Gender:</strong> {patient.gender}
         </p>
+        <h2 className="text-xl font-semibold mt-6">Recent Encounters</h2>
+        {encounters.length > 0 ? (
+          <ul>
+            {encounters.map((encounter) => (
+              <li key={encounter.id}>
+                <p><strong>Start Date:</strong> {encounter.period.start}</p>
+                <p><strong>End Date:</strong> {encounter.period.end}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No recent encounters found.</p>
+        )}
+        <h2 className="text-xl font-semibold mt-6">Latest Condition</h2>
+        {latestCondition ? (
+          <div>
+            <p><strong>Condition:</strong> {latestCondition.code.text || 'No display available'}</p>
+          </div>
+        ) : (
+          <p>No condition found.</p>
+        )}
         <button
           onClick={() => navigate(MEDICAL_QA_NAVIGATE_ROUTES.PATIENT_SPECIFIC_CHAT(patient.id))}
           className={cn(
