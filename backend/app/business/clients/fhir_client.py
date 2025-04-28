@@ -35,4 +35,4 @@ class FHIRClient:
         return self.fhir_client
 
 
-fhir_client_interface = FHIRClient()
+fhir_client = FHIRClient()

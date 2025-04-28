@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from business.clients.fhir_client import fhir_client_interface
+from business.clients.fhir_client import fhir_client
 from config.logger import setup_logging
 from config.settings import get_settings
 from presentation.routers import health
@@ -16,7 +16,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
-    fhir_client_interface.initialize()
+    fhir_client.initialize()
     yield
 
 
