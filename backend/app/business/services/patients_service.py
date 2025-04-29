@@ -38,6 +38,7 @@ class PatientsService:
         """
         try:
             patients = await self.patients.fetch()  # No filters applied
+            logger.debug(f"Length of patients: {len(patients)}")
             return patients
         except MultipleResourcesFound as e:
             logger.error(f"MultipleResourcesFound: {str(e)}")
