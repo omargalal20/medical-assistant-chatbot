@@ -28,7 +28,7 @@ class OrchestratorService:
         self.template = get_medical_qa_template("medical_qa")
         self.retriever = retriever_client
 
-    async def chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
+    async def general_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
         """
         Generate a complete, evidence-based response for a medical query.
 
@@ -94,7 +94,7 @@ class OrchestratorService:
             logger.error(f"LLM failed to generate response: {str(e)}")
             raise RuntimeError("LLM failed to generate response.") from e
 
-    async def chat_stream(self, doctor_query: DoctorQuery) -> AsyncIterable[str]:
+    async def general_medical_qa_chat_stream(self, doctor_query: DoctorQuery) -> AsyncIterable[str]:
         """
         Stream a response for a medical query in real-time.
 
@@ -138,3 +138,69 @@ class OrchestratorService:
         except LangChainException as e:
             logger.error(f"LLM streaming failed: {str(e)}")
             raise RuntimeError("LLM streaming failed.") from e
+
+    async def patient_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
+        """
+        Generate a complete, evidence-based response for a medical query.
+
+        This function:
+        - Constructs a query-specific input template based on the doctor's question.
+        - Runs a pre-configured chain combining the template, LLM, and output parser.
+        - Returns the generated response as an `LLMResponse` object.
+
+        Parameters:
+        - doctor_query (str): The medical question or prompt provided by the doctor.
+
+        Returns:
+        - LLMResponse: Contains the generated response in structured format.
+
+        Raises:
+        - RuntimeError: If the chain fails to generate a response due to an exception.
+        """
+
+        logger.info(f"OrchestratorService, chat, doctor_query: {doctor_query}")
+
+        # Retrieval
+        relevant_articles: list[Document] = await self.retriever.get_relevant_documents(doctor_query.content)
+
+        logger.debug(relevant_articles)
+
+        # Augmentation
+        template = get_medical_qa_template("medical_qa")
+
+        template_vars = {
+            "doctor_query": doctor_query.content
+        }
+
+        if not relevant_articles or (len(relevant_articles) == 0):
+            logger.warning("No relevant articles retrieved. Proceeding without evidence.")
+            template_vars["context"] = "No relevant articles found."
+        else:
+            template_vars["context"] = "\n\n".join(
+                [
+                    f"PubMed ID: {doc.metadata.get('uid', 'Unknown')} | Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}"
+                    for doc in
+                    relevant_articles]
+            )
+
+        logger.debug(f"Medical QA Template Variables: {template_vars}")
+
+        # Generation
+        chain = template | self.llm | StrOutputParser()
+
+        try:
+            response = await chain.ainvoke(template_vars)
+
+            logger.debug(f"Response: {response}")
+
+            current_time = datetime.now()
+
+            return AssistantResponse(
+                id=current_time,
+                role=Role.ASSISTANT,
+                content=response,
+                created_at=current_time
+            )
+        except LangChainException as e:
+            logger.error(f"LLM failed to generate response: {str(e)}")
+            raise RuntimeError("LLM failed to generate response.") from e

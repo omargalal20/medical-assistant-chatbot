@@ -27,7 +27,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@router.websocket("/ws")
+@router.websocket("/general/ws")
 async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
     """
     WebSocket endpoint for the medical qa assistant.
@@ -44,13 +44,13 @@ async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorS
                 json_doctor_query = await websocket.receive_json()
                 doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
                 logger.info(f"doctor_query: {doctor_query}")
-                await manager.send_stream(orchestrator.chat_stream(doctor_query), websocket)
+                await manager.send_stream(orchestrator.general_medical_qa_chat_stream(doctor_query), websocket)
         elif response_mode == "NORMAL":
             while True:
                 json_doctor_query = await websocket.receive_json()
                 doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
                 logger.info(f"doctor_query: {doctor_query}")
-                assistant_response: AssistantResponse = await orchestrator.chat(doctor_query)
+                assistant_response: AssistantResponse = await orchestrator.general_medical_qa_chat(doctor_query)
                 await manager.send_message(assistant_response, websocket)
 
     except WebSocketDisconnect:
