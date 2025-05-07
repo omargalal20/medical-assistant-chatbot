@@ -55,3 +55,21 @@ async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorS
 
     except WebSocketDisconnect:
         logger.info("Client disconnected.")
+
+
+@router.websocket("/patient/ws")
+async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
+    """
+    WebSocket endpoint for the patient qa assistant.
+    """
+
+    await manager.connect(websocket)
+    try:
+        while True:
+            json_doctor_query = await websocket.receive_json()
+            doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
+            logger.info(f"doctor_query: {doctor_query}")
+            assistant_response: AssistantResponse = await orchestrator.patient_medical_qa_chat(doctor_query)
+            await manager.send_message(assistant_response, websocket)
+    except WebSocketDisconnect:
+        logger.info("Client disconnected.")

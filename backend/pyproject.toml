@@ -15,4 +15,5 @@ dependencies = [
     "xmltodict>=0.14.2",
     "boto3>=1.37.33",
     "fhirpy>=2.0.15",
+    "langgraph>=0.4.1",
 ]

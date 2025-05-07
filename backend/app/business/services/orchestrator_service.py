@@ -7,8 +7,10 @@ from langchain_core.exceptions import LangChainException
 from langchain_core.output_parsers import StrOutputParser
 from loguru import logger
 
+from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.llm_client import LLMClient
 from business.clients.retriever_client import RetrieverClient
+from business.schemas.fhir_translator_agent import FHIRTranslatorAgentOutput
 from business.schemas.medical_qa_assistant import AssistantResponse
 from business.templates.v2.medical_qa_template import get_medical_qa_template
 from data.models.enums.role import Role
@@ -20,13 +22,15 @@ class OrchestratorService:
     OrchestratorService that is responsible for connecting the LLM to external services
     """
 
-    def __init__(self, llm_client: LLMClient, retriever_client: RetrieverClient):
+    def __init__(self, llm_client: LLMClient, retriever_client: RetrieverClient,
+                 fhir_translator_agent: FHIRTranslatorAgent):
         """Initialize with injected service dependencies."""
         self.llm_client = llm_client
         llm_client.bind_tools_to_llm([PubmedQueryRun()])
         self.llm = llm_client.get_llm()
         self.template = get_medical_qa_template("medical_qa")
         self.retriever = retriever_client
+        self.fhir_translator_agent = fhir_translator_agent
 
     async def general_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
         """
@@ -75,24 +79,18 @@ class OrchestratorService:
         logger.debug(f"Medical QA Template Variables: {template_vars}")
 
         # Generation
-        chain = template | self.llm | StrOutputParser()
+        response = await self.llm_client.generate_response(template, template_vars)
 
-        try:
-            response = await chain.ainvoke(template_vars)
+        logger.debug(f"Response: {response}")
 
-            logger.debug(f"Response: {response}")
+        current_time = datetime.now()
 
-            current_time = datetime.now()
-
-            return AssistantResponse(
-                id=current_time,
-                role=Role.ASSISTANT,
-                content=response,
-                created_at=current_time
-            )
-        except LangChainException as e:
-            logger.error(f"LLM failed to generate response: {str(e)}")
-            raise RuntimeError("LLM failed to generate response.") from e
+        return AssistantResponse(
+            id=current_time,
+            role=Role.ASSISTANT,
+            content=response,
+            created_at=current_time
+        )
 
     async def general_medical_qa_chat_stream(self, doctor_query: DoctorQuery) -> AsyncIterable[str]:
         """
@@ -158,49 +156,47 @@ class OrchestratorService:
         - RuntimeError: If the chain fails to generate a response due to an exception.
         """
 
-        logger.info(f"OrchestratorService, chat, doctor_query: {doctor_query}")
+        logger.info(f"{self.__class__.__name__}, patient_medical_qa_chat, doctor_query: {doctor_query}")
 
-        # Retrieval
-        relevant_articles: list[Document] = await self.retriever.get_relevant_documents(doctor_query.content)
-
-        logger.debug(relevant_articles)
-
-        # Augmentation
-        template = get_medical_qa_template("medical_qa")
-
-        template_vars = {
-            "doctor_query": doctor_query.content
-        }
-
-        if not relevant_articles or (len(relevant_articles) == 0):
-            logger.warning("No relevant articles retrieved. Proceeding without evidence.")
-            template_vars["context"] = "No relevant articles found."
-        else:
-            template_vars["context"] = "\n\n".join(
-                [
-                    f"PubMed ID: {doc.metadata.get('uid', 'Unknown')} | Title: {doc.metadata.get('Title', 'Unknown')} | Published: {doc.metadata.get('Published', 'Unknown')} | Content: {doc.page_content}"
-                    for doc in
-                    relevant_articles]
-            )
-
-        logger.debug(f"Medical QA Template Variables: {template_vars}")
-
-        # Generation
-        chain = template | self.llm | StrOutputParser()
+        """
+        Translator Agent
+        • Input: Doctor’s natural-language query
+        • Output: FHIR-compliant API query (e.g. RESTful URL + params)
+        """
 
         try:
-            response = await chain.ainvoke(template_vars)
+            fhir_translator_agent_output: FHIRTranslatorAgentOutput = await self.fhir_translator_agent.translate(doctor_query)
+        except Exception as e:
+            logger.error(f"Error during ResearchGate lookup: {e}")
+            raise
 
-            logger.debug(f"Response: {response}")
+        logger.info(f"FHIRTranslatorAgentOutput: {fhir_translator_agent_output}")
 
-            current_time = datetime.now()
+        """
+        Retriever Agent
+        • Input: FHIR query
+        • Action: Calls the FHIR server, handles paging, authentication, retries
+        • Output: Raw FHIR JSON bundle
+        """
 
-            return AssistantResponse(
-                id=current_time,
-                role=Role.ASSISTANT,
-                content=response,
-                created_at=current_time
-            )
-        except LangChainException as e:
-            logger.error(f"LLM failed to generate response: {str(e)}")
-            raise RuntimeError("LLM failed to generate response.") from e
+        """
+        Formatter Agent
+        • Input: FHIR JSON bundle
+        • Action: Extracts relevant fields, summarizes or normalizes them
+        • Output: Structured, concise text or JSON payload ready for the LLM
+        """
+
+        """
+        LLM Invocation
+        • Input: Original doctor query + formatted patient data
+        • Output: Final answer to the doctor
+        """
+
+        current_time = datetime.now()
+
+        return AssistantResponse(
+            id=current_time,
+            role=Role.ASSISTANT,
+            content=fhir_translator_agent_output.fhir_query,
+            created_at=current_time
+        )

@@ -1,4 +1,7 @@
 from langchain_aws import ChatBedrockConverse
+from langchain_core.exceptions import LangChainException
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import PromptTemplate
 from loguru import logger
 
 from config.settings import get_settings
@@ -30,3 +33,16 @@ class LLMClient:
 
     def bind_tools_to_llm(self, tools):
         self.llm.bind_tools(tools)
+
+    async def generate_response(self, prompt_template: PromptTemplate, template_vars: dict) -> str:
+        # Generate output using LLM
+        try:
+            chain = prompt_template | self.llm | StrOutputParser()
+            response = await chain.ainvoke(template_vars)
+            return response
+        except LangChainException as e:
+            logger.error(f"LLM failed to generate response: {str(e)}")
+            raise RuntimeError("LLM failed to generate response.") from e
+        except Exception as e:
+            logger.error(f"Unexpected error occurred during generation: {e}")
+            raise
