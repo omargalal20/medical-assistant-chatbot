@@ -8,7 +8,7 @@ from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.fhir_client import fhir_client
 from business.clients.llm_client import LLMClient
-from business.clients.retriever_client import RetrieverClient
+from business.clients.pubmed_retriever_client import PubmedRetrieverClient
 from business.tools.fhir_tools import FHIRTools
 
 
@@ -19,11 +19,11 @@ def get_llm_client() -> LLMClient:
 LLMClientDependency = Annotated[LLMClient, Depends(get_llm_client)]
 
 
-def get_retriever_client() -> RetrieverClient:
-    return RetrieverClient()
+def get_retriever_client() -> PubmedRetrieverClient:
+    return PubmedRetrieverClient()
 
 
-RetrieverClientDependency = Annotated[RetrieverClient, Depends(get_retriever_client)]
+RetrieverClientDependency = Annotated[PubmedRetrieverClient, Depends(get_retriever_client)]
 
 
 def get_fhir_server() -> AsyncFHIRClient:
@@ -70,6 +70,7 @@ def get_fhir_retriever_agent(
 
 FHIRRetrieverAgentDependency = Annotated[FHIRRetrieverAgent, Depends(get_fhir_retriever_agent)]
 
+
 def get_fhir_formatter_agent(
         llm_client: LLMClientDependency) -> FHIRFormatterAgent:
     """
@@ -82,4 +83,3 @@ def get_fhir_formatter_agent(
 
 
 FHIRFormatterAgentDependency = Annotated[FHIRFormatterAgent, Depends(get_fhir_formatter_agent)]
-

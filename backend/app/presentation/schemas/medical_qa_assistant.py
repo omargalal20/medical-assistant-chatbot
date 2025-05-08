@@ -8,7 +8,6 @@ from data.models.enums.role import Role
 class DoctorQuery(BaseModel):
     id: str = Field(...)
     role: Role = Field(...)
-    patient_id: str = Field(...)
     content: str = Field(...)
     created_at: datetime = Field(...)
 

@@ -25,7 +25,7 @@ class FHIRTranslatorAgent:
         self.agent_name = "FHIRTranslatorAgent"
         self.llm = llm_client.get_llm()
 
-    async def translate(self, doctor_query: DoctorQuery) -> FHIRTranslatorAgentOutput:
+    async def translate(self, patient_id: str, doctor_query: DoctorQuery) -> FHIRTranslatorAgentOutput:
         """
         Translate
         \nInput: Doctor’s natural-language query
@@ -43,7 +43,7 @@ class FHIRTranslatorAgent:
         query = f"""
         - Doctor's query: "{doctor_query.content}"
         - Metadata:
-            - Patient ID: {doctor_query.patient_id}
+            - Patient ID: {patient_id}
             - Query Date: {doctor_query.created_at.isoformat()}
         - Use the following for your thought process:
             - Use the following details:
@@ -72,12 +72,6 @@ class FHIRTranslatorAgent:
         # Create the agent with the updated context
         agent = create_react_agent(name=self.agent_name, model=self.llm, prompt=system_message, tools=[],
                                    response_format=FHIRTranslatorAgentOutput)
-
-        # for step in agent.stream(
-        #         {"messages": query},
-        #         stream_mode="values",
-        # ):
-        #     step["messages"][-1].pretty_print()
 
         response = await agent.ainvoke({"messages": query})
         logger.info(f"Structured Response: {response["structured_response"]}")

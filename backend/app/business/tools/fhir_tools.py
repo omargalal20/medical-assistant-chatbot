@@ -18,7 +18,7 @@ class FHIRTools:
         Initialize FHIRTools with a FHIR client.
         """
         self.fhir_server: AsyncFHIRClient = fhir_server
-        self.tool = StructuredTool.from_function(
+        self.get_fhir_resources_tool = StructuredTool.from_function(
             coroutine=self.get_fhir_resources,
             name="get_fhir_resources",
             parse_docstring=True

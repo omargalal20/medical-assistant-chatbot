@@ -28,9 +28,9 @@ manager = ConnectionManager()
 
 
 @router.websocket("/general/ws")
-async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
+async def general_medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
     """
-    WebSocket endpoint for the medical qa assistant.
+    WebSocket endpoint for the general medical qa assistant.
     """
     # Parse query parameters manually from websocket
     query_params = websocket.query_params
@@ -57,11 +57,14 @@ async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorS
         logger.info("Client disconnected.")
 
 
-@router.websocket("/patient/ws")
-async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorServiceDependency):
+@router.websocket("/patient/{patient_id}/ws")
+async def patient_medical_qa_websocket(patient_id: str, websocket: WebSocket,
+                                       orchestrator: OrchestratorServiceDependency):
     """
-    WebSocket endpoint for the patient qa assistant.
+    WebSocket endpoint for the patient medical qa assistant.
     """
+
+    logger.info(f"Patient ID: {patient_id}")
 
     await manager.connect(websocket)
     try:
@@ -69,7 +72,7 @@ async def medical_qa_websocket(websocket: WebSocket, orchestrator: OrchestratorS
             json_doctor_query = await websocket.receive_json()
             doctor_query: DoctorQuery = DoctorQuery.model_validate(json_doctor_query)
             logger.info(f"doctor_query: {doctor_query}")
-            assistant_response: AssistantResponse = await orchestrator.patient_medical_qa_chat(doctor_query)
+            assistant_response: AssistantResponse = await orchestrator.patient_medical_qa_chat(patient_id, doctor_query)
             await manager.send_message(assistant_response, websocket)
     except WebSocketDisconnect:
         logger.info("Client disconnected.")

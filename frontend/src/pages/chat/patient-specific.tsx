@@ -40,19 +40,16 @@ function PatientSpecificChat() {
   }, [patientId]);
 
   const { messages, input, setInput, handleSubmit, isLoading, isTyping, stop } = useChat(
-    import.meta.env.VITE_WS_URL as string + '/patient/ws', patient?.id
+    import.meta.env.VITE_WS_URL as string + `/patient/${patient?.id}/ws`,
   );
 
   const isEmpty = messages.length === 0;
-
-  console.log('Messages:', messages);
 
   return (
     <div className={cn('flex', 'flex-col', 'h-screen', 'w-full')}>
       {/* Top bar */}
 
       <div className={cn('flex', 'justify-between', 'p-4', 'border-b')}>
-        {/* I want to show Chat about Patient (Name) */}
         <div className='text-lg font-semibold mr-4'>
           {patient ? `Chat about ${getFullName(patient)}` : 'Loading...'}
         </div>

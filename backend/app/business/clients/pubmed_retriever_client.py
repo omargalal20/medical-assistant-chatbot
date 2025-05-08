@@ -6,11 +6,11 @@ from config.settings import get_settings
 settings = get_settings()
 
 
-class RetrieverClient:
-    """Retriever Client"""
+class PubmedRetrieverClient:
+    """PubmedRetrieverClient"""
 
     def __init__(self):
-        """Initialize Retriever configuration."""
+        """Initialize PubmedRetrieverClient configuration."""
         try:
             self.retriever = PubMedRetriever(
                 api_key=settings.RETRIEVER_API_KEY,

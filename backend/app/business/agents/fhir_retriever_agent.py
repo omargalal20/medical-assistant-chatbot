@@ -55,9 +55,9 @@ class FHIRRetrieverAgent:
         - You have access to the following tools to assist users with retrieving data from FHIR servers:
             - `get_fhir_resources`: Use this tool to fetch specific FHIR resources based on provided query parameters. The tool returns structured data representing the requested FHIR resources.
                 - Usage:
-                    - {self.fhir_tools.tool.name}
-                    - {self.fhir_tools.tool.description}
-                    - {self.fhir_tools.tool.args_schema}
+                    - {self.fhir_tools.get_fhir_resources_tool.name}
+                    - {self.fhir_tools.get_fhir_resources_tool.description}
+                    - {self.fhir_tools.get_fhir_resources_tool.args_schema}
         # Knowledge Base
         - You have access to the following detailed information about using the FHIR client to construct and execute resource queries:
             
@@ -108,18 +108,8 @@ class FHIRRetrieverAgent:
             name=self.agent_name,
             model=self.llm,
             prompt=system_message,
-            tools=[self.fhir_tools.tool],
+            tools=[self.fhir_tools.get_fhir_resources_tool],
         )
-
-        # Execute the agent with the given query and stream the results
-        # async for step in agent.astream(
-        #         {"messages": query_prompt},
-        #         stream_mode="values",
-        # ):
-        #     step["messages"][-1].pretty_print()
 
         response = await agent.ainvoke({"messages": query_prompt})
         return response["messages"][-1].content
-        # logger.info(f"FHIRRetrieverAgent Response: {response}")
-        # logger.info(f"Structured Response: {response["structured_response"]}")
-        # return response["structured_response"]

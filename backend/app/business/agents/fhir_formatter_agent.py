@@ -71,13 +71,5 @@ class FHIRFormatterAgent:
             prompt=system_message,
             tools=[],
         )
-
-        # Execute the agent with the given query and stream the results
-        # async for step in agent.astream(
-        #         {"messages": query_prompt},
-        #         stream_mode="values",
-        # ):
-        #     step["messages"][-1].pretty_print()
-
         response = await agent.ainvoke({"messages": query_prompt})
         return response["messages"][-1].content

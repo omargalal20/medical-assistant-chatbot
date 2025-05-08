@@ -11,11 +11,10 @@ from business.agents.fhir_formatter_agent import FHIRFormatterAgent
 from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.llm_client import LLMClient
-from business.clients.retriever_client import RetrieverClient
+from business.clients.pubmed_retriever_client import PubmedRetrieverClient
 from business.schemas.fhir_translator_agent import FHIRTranslatorAgentOutput
 from business.schemas.medical_qa_assistant import AssistantResponse
 from business.templates.v2.medical_qa_template import get_medical_qa_template
-from business.templates.v2.patient_qa_template import get_patient_qa_template
 from data.models.enums.role import Role
 from presentation.schemas.medical_qa_assistant import DoctorQuery
 
@@ -27,7 +26,7 @@ class OrchestratorService:
 
     def __init__(self,
                  llm_client: LLMClient,
-                 retriever_client: RetrieverClient,
+                 retriever_client: PubmedRetrieverClient,
                  fhir_translator_agent: FHIRTranslatorAgent,
                  fhir_retriever_agent: FHIRRetrieverAgent,
                  fhir_formatter_agent: FHIRFormatterAgent
@@ -147,7 +146,7 @@ class OrchestratorService:
             logger.error(f"LLM streaming failed: {str(e)}")
             raise RuntimeError("LLM streaming failed.") from e
 
-    async def patient_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
+    async def patient_medical_qa_chat(self, patient_id: str, doctor_query: DoctorQuery) -> AssistantResponse:
         """
         Generate a complete, evidence-based response for a medical query.
 
@@ -176,6 +175,7 @@ class OrchestratorService:
 
         try:
             fhir_translator_agent_output: FHIRTranslatorAgentOutput = await self.fhir_translator_agent.translate(
+                patient_id,
                 doctor_query)
         except Exception as e:
             logger.error(f"Error during ResearchGate lookup: {e}")
@@ -221,7 +221,7 @@ class OrchestratorService:
         """
 
         # Augmentation
-        template = get_patient_qa_template("patient_qa")
+        template = get_medical_qa_template("patient_qa")
 
         template_vars = {
             "doctor_query": doctor_query.content,
