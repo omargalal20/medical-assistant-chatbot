@@ -7,6 +7,7 @@ from langchain_core.exceptions import LangChainException
 from langchain_core.output_parsers import StrOutputParser
 from loguru import logger
 
+from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.llm_client import LLMClient
 from business.clients.retriever_client import RetrieverClient
@@ -23,7 +24,7 @@ class OrchestratorService:
     """
 
     def __init__(self, llm_client: LLMClient, retriever_client: RetrieverClient,
-                 fhir_translator_agent: FHIRTranslatorAgent):
+                 fhir_translator_agent: FHIRTranslatorAgent, fhir_retriever_agent: FHIRRetrieverAgent):
         """Initialize with injected service dependencies."""
         self.llm_client = llm_client
         llm_client.bind_tools_to_llm([PubmedQueryRun()])
@@ -31,6 +32,7 @@ class OrchestratorService:
         self.template = get_medical_qa_template("medical_qa")
         self.retriever = retriever_client
         self.fhir_translator_agent = fhir_translator_agent
+        self.fhir_retriever_agent = fhir_retriever_agent
 
     async def general_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
         """
@@ -165,7 +167,8 @@ class OrchestratorService:
         """
 
         try:
-            fhir_translator_agent_output: FHIRTranslatorAgentOutput = await self.fhir_translator_agent.translate(doctor_query)
+            fhir_translator_agent_output: FHIRTranslatorAgentOutput = await self.fhir_translator_agent.translate(
+                doctor_query)
         except Exception as e:
             logger.error(f"Error during ResearchGate lookup: {e}")
             raise
@@ -178,6 +181,14 @@ class OrchestratorService:
         • Action: Calls the FHIR server, handles paging, authentication, retries
         • Output: Raw FHIR JSON bundle
         """
+
+        try:
+            fhir_retriever_agent_output = await self.fhir_retriever_agent.retrieve(fhir_translator_agent_output)
+        except Exception as e:
+            logger.error(f"Error during ResearchGate lookup: {e}")
+            raise
+
+        logger.info(f"FHIRRetrieverAgentOutput: {fhir_retriever_agent_output}")
 
         """
         Formatter Agent

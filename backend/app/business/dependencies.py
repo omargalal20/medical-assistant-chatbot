@@ -3,10 +3,12 @@ from typing import Annotated
 from fastapi import Depends
 from fhirpy import AsyncFHIRClient
 
+from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.fhir_client import fhir_client
 from business.clients.llm_client import LLMClient
 from business.clients.retriever_client import RetrieverClient
+from business.tools.fhir_tools import FHIRTools
 
 
 def get_llm_client() -> LLMClient:
@@ -42,3 +44,27 @@ def get_fhir_translator_agent(
 
 
 TranslatorAgentDependency = Annotated[FHIRTranslatorAgent, Depends(get_fhir_translator_agent)]
+
+
+def get_fhir_tools(fhir_server: FHIRServerDependency) -> FHIRTools:
+    return FHIRTools(fhir_server)
+
+
+FHIRToolsDependency = Annotated[FHIRTools, Depends(get_fhir_tools)]
+
+
+def get_fhir_retriever_agent(
+        llm_client: LLMClientDependency,
+        fhir_server: FHIRServerDependency
+) -> FHIRRetrieverAgent:
+    """
+    Creates and returns an instance of the TranslatorAgent.
+
+    The TranslatorAgent is responsible for converting natural-language queries
+    into FHIR-compliant API queries using the provided LLM and LangSmith clients.
+    """
+    fhir_tools = get_fhir_tools(fhir_server)
+    return FHIRRetrieverAgent(llm_client, fhir_tools)
+
+
+FHIRRetrieverAgentDependency = Annotated[FHIRRetrieverAgent, Depends(get_fhir_retriever_agent)]
