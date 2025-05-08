@@ -4,13 +4,11 @@ from fhirpy.base.exceptions import BaseFHIRError, MultipleResourcesFound
 from fhirpy.lib import AsyncFHIRSearchSet
 from loguru import logger
 
-from business.dependencies import FHIRServerDependency
-
 
 class ConditionsService:
     """Service to manage FHIR Condition resources."""
 
-    def __init__(self, fhir_server: FHIRServerDependency):
+    def __init__(self, fhir_server: AsyncFHIRClient):
         """
         Initialize ConditionsService with a FHIR client.
         """

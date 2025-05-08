@@ -4,13 +4,11 @@ from fhirpy.base.exceptions import BaseFHIRError, MultipleResourcesFound
 from fhirpy.lib import AsyncFHIRSearchSet
 from loguru import logger
 
-from business.dependencies import FHIRServerDependency
-
 
 class EncountersService:
     """Service to manage FHIR Encounter resources."""
 
-    def __init__(self, fhir_server: FHIRServerDependency):
+    def __init__(self, fhir_server: AsyncFHIRClient):
         """
         Initialize EncountersService with a FHIR client.
         """

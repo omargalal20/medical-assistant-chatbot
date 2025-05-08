@@ -4,13 +4,11 @@ from fhirpy.base.exceptions import BaseFHIRError, ResourceNotFound, MultipleReso
 from fhirpy.lib import AsyncFHIRSearchSet
 from loguru import logger
 
-from business.dependencies import FHIRServerDependency
-
 
 class PatientsService:
     """Service to manage FHIR Patient resources."""
 
-    def __init__(self, fhir_server: FHIRServerDependency):
+    def __init__(self, fhir_server: AsyncFHIRClient):
         """
         Initialize PatientsService with a FHIR client.
         """
