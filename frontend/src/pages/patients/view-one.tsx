@@ -33,6 +33,10 @@ function ViewOne() {
           getLatestCondition(patientId),
         ]);
 
+        console.log('Patient Data:', patientData);
+        console.log('Encounters Data:', encountersData);
+        console.log('Latest Condition Data:', conditionData[0]);
+
         setPatient(patientData);
         setEncounters(encountersData);
         setLatestCondition(conditionData[0]);
@@ -113,13 +117,13 @@ function ViewOne() {
                   <strong>Status:</strong> {encounter.status}
                 </p>
                 <p>
-                  <strong>Type:</strong> {encounter.type.map((type) => type.text).join(', ')}
+                  <strong>Type:</strong> {encounter.type && encounter.type.map((type) => type.text).join(', ')}
                 </p>
                 <p>
                   <strong>Class:</strong> {encounter.class.code}
                 </p>
                 <p>
-                  <strong>Service Provider:</strong> {encounter.serviceProvider.display}
+                  <strong>Service Provider:</strong> {encounter.serviceProvider?.display}
                 </p>
                 <p>
                   <strong>Reason Code:</strong>{' '}
@@ -144,7 +148,10 @@ function ViewOne() {
         {latestCondition ? (
           <div className='p-4 rounded-lg shadow-md border border-gray-200'>
             <p>
-              <strong>Condition:</strong> {latestCondition.code.text || 'No display available'}
+              <strong className='m-1'>Condition:</strong>
+              <strong>{latestCondition.code.coding
+                .map((code) => code.display || 'No display available')
+                .join(', ')}</strong>
             </p>
           </div>
         ) : (

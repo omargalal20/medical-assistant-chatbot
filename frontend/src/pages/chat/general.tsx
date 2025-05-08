@@ -21,7 +21,7 @@ function General() {
   const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
 
   const { messages, input, setInput, handleSubmit, isLoading, isTyping, stop } = useChat(
-    import.meta.env.VITE_WS_URL as string,
+    import.meta.env.VITE_WS_URL as string + '/general/ws',
   );
 
   const isEmpty = messages.length === 0;

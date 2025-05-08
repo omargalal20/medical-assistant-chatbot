@@ -1,54 +1,108 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import useChat from '@/hooks/use-chat';
+
 import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ChatContainer, ChatForm, ChatMessages } from '@/components/ui/chat';
+import { MessageInput } from '@/components/ui/message-input';
+import { MessageList } from '@/components/ui/message-list';
 import { useParams } from 'react-router-dom';
+import { PatientResource } from '@/services/v1/patients/types';
+import { getOne } from '@/services/v1/patients/routes';
+import { getFullName } from '../patients/utils';
+
+const MODELS = [{ id: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0', name: 'Claude 3.7 Sonnet' }];
 
 function PatientSpecificChat() {
   const { patientId } = useParams();
-  const patient = { id: Number(patientId), name: 'John Doe', age: 45, condition: 'Hypertension' }; // Mock data
+  const [patient, setPatient] = useState<PatientResource | null>(null);
+  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+
+  useEffect(() => {
+    if (!patientId) return;
+    const fetchPatientData = async () => {
+      try {
+        const patientData = await getOne(patientId);
+        setPatient(patientData);
+      } catch (error) {
+        console.error('Failed to fetch patient details:', error);
+      }
+    };
+    fetchPatientData();
+  }, [patientId]);
+
+  const { messages, input, setInput, handleSubmit, isLoading, isTyping, stop } = useChat(
+    import.meta.env.VITE_WS_URL as string + '/patient/ws', patient?.id
+  );
+
+  const isEmpty = messages.length === 0;
+
+  console.log('Messages:', messages);
 
   return (
-    <div
-      className={cn(
-        'flex',
-        'flex-col',
-        'items-center',
-        'justify-center',
-        'h-screen',
-        'w-full',
-        'p-4',
-      )}
-    >
-      <h1 className='text-2xl font-semibold mb-4'>
-        Chat About Patient #{patientId}, {patient.name}
-      </h1>
-      <textarea
-        placeholder='Ask a question about this patient...'
-        className={cn(
-          'w-full',
-          'max-w-lg',
-          'h-40',
-          'p-2',
-          'border',
-          'border-gray-300',
-          'rounded-lg',
-          'focus:ring-2',
-          'focus:ring-green-500',
+    <div className={cn('flex', 'flex-col', 'h-screen', 'w-full')}>
+      {/* Top bar */}
+
+      <div className={cn('flex', 'justify-between', 'p-4', 'border-b')}>
+        {/* I want to show Chat about Patient (Name) */}
+        <div className='text-lg font-semibold mr-4'>
+          {patient ? `Chat about ${getFullName(patient)}` : 'Loading...'}
+        </div>
+        <div className='text-lg mr-4'>
+          {patient ? `Patient ID: ${patient.id}` : ''}
+        </div>
+        <div className='text-lg mr-4'>
+          {patient ? `Date of Birth: ${patient.birthDate}` : ''}
+        </div>
+
+        <Select value={selectedModel} onValueChange={setSelectedModel}>
+          <SelectTrigger className='w-[25%]'>
+            <SelectValue placeholder='Select Model' />
+          </SelectTrigger>
+          <SelectContent>
+            {MODELS.map((model) => (
+              <SelectItem key={model.id} value={model.id}>
+                {model.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Chat area */}
+      <ChatContainer className='flex-1 flex flex-col overflow-hidden'>
+        {!isEmpty && (
+          <ChatMessages messages={messages}>
+            <MessageList messages={messages} isTyping={isTyping} />
+          </ChatMessages>
         )}
-      ></textarea>
-      <button
-        className={cn(
-          'mt-4',
-          'bg-green-500',
-          'text-white',
-          'px-6',
-          'py-2',
-          'rounded-lg',
-          'hover:bg-green-600',
-        )}
-      >
-        Submit
-      </button>
+
+        <ChatForm
+          className='w-ful mt-auto px-4 py-2 border-t'
+          isPending={isLoading || isTyping}
+          handleSubmit={handleSubmit}
+        >
+          {({ files, setFiles }) => (
+            <MessageInput
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              allowAttachments
+              files={files}
+              setFiles={setFiles}
+              stop={stop}
+              isGenerating={isLoading}
+            />
+          )}
+        </ChatForm>
+      </ChatContainer>
     </div>
   );
 }

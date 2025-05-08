@@ -21,6 +21,7 @@ interface MessagePayload {
   role: Role.USER | Role.ASSISTANT;
   content: string;
   created_at: Date;
+  patient_id?: string;
   attachments?: {
     name: string;
     size: number;
@@ -28,7 +29,7 @@ interface MessagePayload {
   }[];
 }
 
-const useChat = (url: string): UseChatHook => {
+const useChat = (url: string, patient_id?: string): UseChatHook => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -110,6 +111,7 @@ const useChat = (url: string): UseChatHook => {
       id: `${Date.now()}`,
       role: Role.USER,
       content: input,
+      patient_id: patient_id,
       created_at: new Date(),
     };
 
