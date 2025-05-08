@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 
 from business.dependencies import LLMClientDependency, RetrieverClientDependency, FHIRServerDependency, \
-    TranslatorAgentDependency, FHIRRetrieverAgentDependency
+    TranslatorAgentDependency, FHIRRetrieverAgentDependency, FHIRFormatterAgentDependency
 from business.services.conditions_service import ConditionsService
 from business.services.encounters_service import EncountersService
 from business.services.orchestrator_service import OrchestratorService
@@ -13,9 +13,11 @@ from business.services.patients_service import PatientsService
 def get_orchestrator(llm_client: LLMClientDependency,
                      retriever_client: RetrieverClientDependency,
                      fhir_translator_agent: TranslatorAgentDependency,
-                     fhir_retriever_agent: FHIRRetrieverAgentDependency) -> OrchestratorService:
+                     fhir_retriever_agent: FHIRRetrieverAgentDependency,
+                     fhir_formatter_agent: FHIRFormatterAgentDependency) -> OrchestratorService:
     """Provide a configured orchestrator."""
-    return OrchestratorService(llm_client, retriever_client, fhir_translator_agent, fhir_retriever_agent)
+    return OrchestratorService(llm_client, retriever_client, fhir_translator_agent, fhir_retriever_agent,
+                               fhir_formatter_agent)
 
 
 def get_patients_service(

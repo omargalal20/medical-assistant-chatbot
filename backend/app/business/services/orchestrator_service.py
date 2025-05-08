@@ -7,6 +7,7 @@ from langchain_core.exceptions import LangChainException
 from langchain_core.output_parsers import StrOutputParser
 from loguru import logger
 
+from business.agents.fhir_formatter_agent import FHIRFormatterAgent
 from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.llm_client import LLMClient
@@ -14,6 +15,7 @@ from business.clients.retriever_client import RetrieverClient
 from business.schemas.fhir_translator_agent import FHIRTranslatorAgentOutput
 from business.schemas.medical_qa_assistant import AssistantResponse
 from business.templates.v2.medical_qa_template import get_medical_qa_template
+from business.templates.v2.patient_qa_template import get_patient_qa_template
 from data.models.enums.role import Role
 from presentation.schemas.medical_qa_assistant import DoctorQuery
 
@@ -23,8 +25,13 @@ class OrchestratorService:
     OrchestratorService that is responsible for connecting the LLM to external services
     """
 
-    def __init__(self, llm_client: LLMClient, retriever_client: RetrieverClient,
-                 fhir_translator_agent: FHIRTranslatorAgent, fhir_retriever_agent: FHIRRetrieverAgent):
+    def __init__(self,
+                 llm_client: LLMClient,
+                 retriever_client: RetrieverClient,
+                 fhir_translator_agent: FHIRTranslatorAgent,
+                 fhir_retriever_agent: FHIRRetrieverAgent,
+                 fhir_formatter_agent: FHIRFormatterAgent
+                 ):
         """Initialize with injected service dependencies."""
         self.llm_client = llm_client
         llm_client.bind_tools_to_llm([PubmedQueryRun()])
@@ -33,6 +40,7 @@ class OrchestratorService:
         self.retriever = retriever_client
         self.fhir_translator_agent = fhir_translator_agent
         self.fhir_retriever_agent = fhir_retriever_agent
+        self.fhir_formatter_agent = fhir_formatter_agent
 
     async def general_medical_qa_chat(self, doctor_query: DoctorQuery) -> AssistantResponse:
         """
@@ -197,17 +205,43 @@ class OrchestratorService:
         • Output: Structured, concise text or JSON payload ready for the LLM
         """
 
+        try:
+            fhir_formatter_agent_output = await self.fhir_formatter_agent.format(fhir_translator_agent_output,
+                                                                                 fhir_retriever_agent_output)
+        except Exception as e:
+            logger.error(f"Error during ResearchGate lookup: {e}")
+            raise
+
+        logger.info(f"FHIRFormatterAgentOutput: {fhir_formatter_agent_output}")
+
         """
         LLM Invocation
         • Input: Original doctor query + formatted patient data
         • Output: Final answer to the doctor
         """
 
+        # Augmentation
+        template = get_patient_qa_template("patient_qa")
+
+        template_vars = {
+            "doctor_query": doctor_query.content,
+            "fhir_query": fhir_translator_agent_output.fhir_query,
+            "intent": fhir_translator_agent_output.intent,
+            "entities": fhir_translator_agent_output.entities,
+            "ambiguities": fhir_translator_agent_output.ambiguities,
+            "formatted_fhir_data": fhir_formatter_agent_output
+        }
+
+        # Generation
+        response = await self.llm_client.generate_response(template, template_vars)
+
+        logger.debug(f"Response: {response}")
+
         current_time = datetime.now()
 
         return AssistantResponse(
             id=current_time,
             role=Role.ASSISTANT,
-            content=fhir_translator_agent_output.fhir_query,
+            content=response,
             created_at=current_time
         )

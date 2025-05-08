@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from fhirpy import AsyncFHIRClient
 
+from business.agents.fhir_formatter_agent import FHIRFormatterAgent
 from business.agents.fhir_retriever_agent import FHIRRetrieverAgent
 from business.agents.fhir_translator_agent import FHIRTranslatorAgent
 from business.clients.fhir_client import fhir_client
@@ -32,6 +33,13 @@ def get_fhir_server() -> AsyncFHIRClient:
 FHIRServerDependency = Annotated[AsyncFHIRClient, Depends(get_fhir_server)]
 
 
+def get_fhir_tools(fhir_server: FHIRServerDependency) -> FHIRTools:
+    return FHIRTools(fhir_server)
+
+
+FHIRToolsDependency = Annotated[FHIRTools, Depends(get_fhir_tools)]
+
+
 def get_fhir_translator_agent(
         llm_client: LLMClientDependency) -> FHIRTranslatorAgent:
     """
@@ -44,13 +52,6 @@ def get_fhir_translator_agent(
 
 
 TranslatorAgentDependency = Annotated[FHIRTranslatorAgent, Depends(get_fhir_translator_agent)]
-
-
-def get_fhir_tools(fhir_server: FHIRServerDependency) -> FHIRTools:
-    return FHIRTools(fhir_server)
-
-
-FHIRToolsDependency = Annotated[FHIRTools, Depends(get_fhir_tools)]
 
 
 def get_fhir_retriever_agent(
@@ -68,3 +69,17 @@ def get_fhir_retriever_agent(
 
 
 FHIRRetrieverAgentDependency = Annotated[FHIRRetrieverAgent, Depends(get_fhir_retriever_agent)]
+
+def get_fhir_formatter_agent(
+        llm_client: LLMClientDependency) -> FHIRFormatterAgent:
+    """
+    Creates and returns an instance of the FHIRFormatterAgent.
+
+    The FHIRFormatterAgent is responsible for converting raw FHIR data into an
+    LLM-friendly format by extracting key details and structuring them concisely.
+    """
+    return FHIRFormatterAgent(llm_client)
+
+
+FHIRFormatterAgentDependency = Annotated[FHIRFormatterAgent, Depends(get_fhir_formatter_agent)]
+
