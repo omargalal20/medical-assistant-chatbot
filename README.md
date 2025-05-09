@@ -23,6 +23,10 @@ quickly and efficiently, and receive patient-specific, evidence-based guidance t
 
 ![Tech Stack](./assets/medical-qa-chatbot-tech-stack.png)
 
+# High Level Architecture
+
+![High Level Architecture](./assets/medical-qa-high-level-architecture.png)
+
 # Backend
 
 The **Medical Q&A Assistant** backend is a LangChain-powered system designed to provide evidence-based medical answers
