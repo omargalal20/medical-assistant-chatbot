@@ -12,11 +12,11 @@
 
 ## General Medical QA Flow Architecture
 
-![System Architecture](./assets/general-medical-qa-flow-architecture.png)
+![eneral Medical QA Flow Architecture](./assets/general-medical-qa-flow-architecture.png)
 
 ## Patient Medical QA Flow Architecture
 
-![Ice Breaker Architecture](./assets/patient-medical-qa-flow-architecture.png)
+![Patient Medical QA Flow  Architecture](./assets/patient-medical-qa-flow-architecture.png)
 
 # Getting Started
 
@@ -150,3 +150,94 @@ Defines the presentation layer, including API routes, request/response validatio
       Defines input validation schemas.
     - **`response/`**:  
       Defines output validation schemas.
+
+# Deployment
+
+## Deploying with Docker (Manual)
+
+To manually deploy the `Medical QA Assistant Backend` application using Docker, follow these steps:
+
+1. **Build the Docker image**:
+    ```bash
+    docker build -t medical-qa-assistant_backend:${APP_VERSION} .
+    ```
+
+2. **Run the Docker container**:
+    ```bash
+    docker run -d -p ${APP_PORT}:${APP_PORT} --env-file .env medical-qa-assistant_backend:${APP_VERSION}
+    ```
+
+    - This will run the container in detached mode (`-d`) and map the container’s port to the specified `APP_PORT`.
+    - Make sure to replace `${APP_PORT}` with the actual port you want to run the application on (e.g., `8000`).
+
+3. **Check running container**:
+    ```bash
+    docker ps
+    ```
+
+   This will show all running containers. Your container should be listed.
+
+4. **Access the application**:
+   Once the container is running, open your browser and go to `http://localhost:${APP_PORT}` to interact with the API.
+
+---
+
+## Deploying with Docker Compose
+
+If you prefer to use Docker Compose, follow these steps:
+
+1. **Create a `docker-compose.yml` file**:
+    ```yaml
+    name: medical-qa-assistant
+    
+    services:
+      backend:
+        container_name: backend
+        build:
+          context: .  # Path to the directory with the Dockerfile
+          dockerfile: ./Dockerfile
+        ports:
+          - "${APP_PORT}:${APP_PORT}"  # Ensure APP_PORT is defined in your .env
+        env_file:
+          - .env
+    ```
+
+2. **Start the application with Docker Compose**:
+    ```bash
+    docker-compose up --build -d
+    ```
+
+    - This will build the image (if necessary) and start the container in detached mode (`-d`).
+
+3. **Check running container**:
+    ```bash
+    docker-compose ps
+    ```
+
+   This will show all services managed by Docker Compose. You should see the `medical-qa-assistant_backend` service listed.
+
+4. **Access the application**:
+   Once the container is running, open your browser and go to `http://localhost:${APP_PORT}` to interact with the API.
+
+5. **Stopping the application**:
+    ```bash
+    docker-compose down
+    ```
+
+   This will stop and remove the container along with any associated networks.
+
+---
+
+### Additional Notes
+
+- **Environment Variables**: Make sure you have the `.env` file properly configured with all the necessary environment
+  variables (as described earlier in the README).
+- **Application Logs**: To view the logs of the running container, you can use:
+    ```bash
+    docker logs medical-qa-assistant_backend
+    ```
+
+---
+
+By following these steps, you can deploy and run the `Medical QA Assistant Backend` application using Docker or Docker Compose
+easily.
